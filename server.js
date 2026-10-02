@@ -20,6 +20,9 @@ const MIME = {
   ".gif": "image/gif",
   ".svg": "image/svg+xml",
   ".ico": "image/x-icon",
+  ".xml": "application/xml",
+  ".txt": "text/plain; charset=utf-8",
+  ".webmanifest": "application/manifest+json",
   ".woff2": "font/woff2",
 };
 

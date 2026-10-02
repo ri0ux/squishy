@@ -14,6 +14,40 @@
     if (el) el.setAttribute("content", content);
   }
 
+  function setCanonical(href) {
+    let link = document.querySelector('link[rel="canonical"]');
+    if (!link) {
+      link = document.createElement("link");
+      link.setAttribute("rel", "canonical");
+      document.head.appendChild(link);
+    }
+    link.setAttribute("href", href);
+  }
+
+  function setProductJsonLd(p, pageUrl) {
+    const node = document.getElementById("product-json");
+    if (!node) return;
+    if (p.status !== "live") {
+      node.remove(); // coming-soon products get no Product markup
+      return;
+    }
+    node.textContent = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Product",
+      name: p.name,
+      description: p.blurb,
+      image: p.images.map((i) => `https://thesquishycorner.com${i.src}`),
+      brand: { "@type": "Brand", name: "The Squishy Corner" },
+      offers: {
+        "@type": "Offer",
+        price: Number(p.price).toFixed(2),
+        priceCurrency: "USD",
+        availability: "https://schema.org/InStock",
+        url: pageUrl,
+      },
+    });
+  }
+
   function init() {
     const product = window.getProduct(slugFromURL());
     if (!product) {
@@ -27,9 +61,13 @@
     }
     document.body.dataset.theme = product.theme || "peanut";
     document.title = `${product.name} — The Squishy Corner`;
+    const pageUrl = `https://thesquishycorner.com/p/${product.slug}`;
     setMeta('meta[property="og:title"]', `${product.name} — The Squishy Corner`);
     setMeta('meta[property="og:description"]', product.blurb);
-    if (product.images[0]) setMeta('meta[property="og:image"]', product.images[0].src);
+    setMeta('meta[property="og:url"]', pageUrl);
+    if (product.images[0]) setMeta('meta[property="og:image"]', `https://thesquishycorner.com${product.images[0].src}`);
+    setCanonical(pageUrl);
+    setProductJsonLd(product, pageUrl);
 
     if (product.status === "coming-soon") return renderSoon(product);
     renderLive(product);

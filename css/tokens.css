@@ -99,6 +99,20 @@ h3 { font-size: 1.2rem; }
 
 ::selection { background: var(--accent); color: var(--ink); }
 
+/* Skip link (a11y): hidden until focused */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  background: var(--ink);
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 0 0 12px 0;
+  font-weight: 800;
+}
+.skip-link:focus { left: 0; color: #fff; }
+
 /* Buttons — coral filled is reserved for buy actions only. */
 .btn {
   display: inline-flex;

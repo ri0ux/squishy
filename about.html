@@ -10,16 +10,30 @@
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/tokens.css">
   <link rel="stylesheet" href="/css/site.css">
-  <link rel="icon" href="/images/logo.png">
-  <link rel="apple-touch-icon" href="/images/logo.png">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" href="/images/logo.png" type="image/png">
+  <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="The Squishy Corner">
   <meta property="og:title" content="About Us — The Squishy Corner">
   <meta property="og:description" content="We're building the cutest corner of the internet, one squishy at a time.">
-  <meta property="og:image" content="/images/logo.png">
+  <meta property="og:image" content="https://thesquishycorner.com/images/logo.png">
+  <link rel="canonical" href="https://thesquishycorner.com/about">
+  <meta name="theme-color" content="#F6B93B">
+  <meta property="og:url" content="https://thesquishycorner.com/about">
+  <meta property="og:image:width" content="1600">
+  <meta property="og:image:height" content="1600">
+  <meta property="og:image:alt" content="The Squishy Corner logo">
   <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="About Us — The Squishy Corner">
+  <meta name="twitter:description" content="We're building the cutest corner of the internet, one squishy at a time.">
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"Organization","name":"The Squishy Corner","url":"https://thesquishycorner.com/","logo":"https://thesquishycorner.com/images/logo.png","description":"Cute, satisfying squishy fidget toys with free shipping.","email":"hello@thesquishycorner.com"}
+  </script>
 </head>
 <body data-theme="peanut">
+  <a class="skip-link" href="#main-content">Skip to content</a>
   <div class="announce"><strong>Free shipping</strong> on every order · The crunchy peanut — just $10</div>
   <header class="site-header"><div class="wrap header-inner">
     <a class="logo" href="/" aria-label="The Squishy Corner home">
@@ -35,7 +49,7 @@
     <button class="cart-btn" data-open-cart><span data-icon="bag" style="display:inline-flex"></span>Cart&nbsp;<span class="cart-count" data-cart-count>0</span></button>
   </div></header>
 
-  <main><div class="wrap prose">
+  <main id="main-content"><div class="wrap prose">
     <h1>A very serious squishy company</h1>
     <p class="lede">The Squishy Corner started with one belief: the world needs better things to squeeze.</p>
     <img class="about-art" src="/images/kawaii.png" alt="Smiling kawaii peanut character with flowers">
