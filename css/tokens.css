@@ -1,0 +1,153 @@
+/* Design tokens for The Squishy Corner.
+   Layer 1: raw palette. Layer 2: semantic roles. Per-product themes
+   override the semantic layer via [data-theme] on <body>. */
+
+:root {
+  /* Raw palette — pulled from the peanut packaging */
+  --peanut-yellow: #f6b93b;
+  --peanut-deep: #dd8f06;
+  --coral: #e14d4a;
+  --coral-deep: #c23835;
+  --teal: #1fa89a;
+  --teal-deep: #14776d;
+  --cocoa: #3a2a26;
+  --cocoa-soft: #6e5b54;
+  --cream: #fff6e3;
+  --blush: #ffedef;
+  --mint: #e2f5ef;
+  --line: #f0e2d4;
+  --paper: #ffffff;
+  --success: #2e7d32;
+  --star: #f5a623;
+
+  /* Semantic layer (default / peanut theme) */
+  --accent: var(--peanut-yellow);
+  --accent-deep: var(--peanut-deep);
+  --tint: var(--cream);
+  --cta: var(--coral);
+  --cta-deep: var(--coral-deep);
+  --ink: var(--cocoa);
+  --ink-soft: var(--cocoa-soft);
+  --surface: var(--paper);
+  --surface-tint: var(--tint);
+  --border: var(--line);
+
+  /* Type */
+  --font-display: "Fredoka", "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-body: "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* Shape */
+  --radius-sm: 10px;
+  --radius-md: 18px;
+  --radius-lg: 28px;
+  --radius-pill: 999px;
+
+  /* Motion */
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-out: cubic-bezier(0.22, 0.9, 0.3, 1);
+
+  --max-width: 1120px;
+  --header-h: 60px;
+}
+
+/* Per-product themes: one override block per squishy. */
+body[data-theme="peanut"] {
+  --accent: #f6b93b;
+  --accent-deep: #dd8f06;
+  --tint: #fff6e3;
+}
+
+body[data-theme="bean"] {
+  --accent: #1fa89a;
+  --accent-deep: #14776d;
+  --tint: #e2f5ef;
+}
+
+/* Base */
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--ink);
+  background: var(--paper);
+  min-height: 100vh;
+}
+img { max-width: 100%; display: block; }
+a { color: inherit; }
+button { font: inherit; cursor: pointer; }
+input { font: inherit; }
+
+h1, h2, h3, .display {
+  font-family: var(--font-display);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+h1 { font-size: 2rem; }
+h2 { font-size: 1.5rem; }
+h3 { font-size: 1.2rem; }
+
+.wrap {
+  width: 100%;
+  max-width: var(--max-width);
+  margin-inline: auto;
+  padding-inline: 20px;
+}
+
+::selection { background: var(--accent); color: var(--ink); }
+
+/* Buttons — coral filled is reserved for buy actions only. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 52px;
+  padding: 12px 28px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.05rem;
+  text-decoration: none;
+  transition: transform 140ms var(--spring), background-color 140ms ease, box-shadow 140ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn:active { transform: scale(0.96); }
+.btn-primary { background: var(--cta); color: #fff; box-shadow: 0 6px 0 var(--cta-deep); }
+.btn-primary:hover { background: #e95956; }
+.btn-primary:active { box-shadow: 0 2px 0 var(--cta-deep); transform: scale(0.97); }
+.btn-dark { background: var(--ink); color: #fff; }
+.btn-dark:hover { background: #4c3833; }
+.btn-ghost { background: var(--surface-tint); color: var(--ink); border: 2px solid var(--border); min-height: 48px; }
+.btn-block { width: 100%; }
+.btn[disabled] { opacity: 0.55; cursor: not-allowed; box-shadow: none; }
+
+/* Badges, stars */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.8rem;
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  background: var(--ink);
+  color: #fff;
+  white-space: nowrap;
+}
+.badge-accent { background: var(--accent); color: var(--ink); }
+.badge-sale { background: var(--cta); color: #fff; }
+.stars { color: var(--star); font-size: 1rem; letter-spacing: 2px; white-space: nowrap; }
+.stars .off { color: #e5d5c5; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
