@@ -248,7 +248,5 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, () => {
-  const mode = !STRIPE_SECRET_KEY ? "off (no STRIPE_SECRET_KEY)"
-    : STRIPE_SECRET_KEY.startsWith("sk_live_") ? "LIVE" : "test";
-  console.log(`The Squishy Corner running at http://localhost:${PORT} — Stripe: ${mode}`);
+  console.log(`The Squishy Corner running at http://localhost:${PORT}`);
 });
