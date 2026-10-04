@@ -37,6 +37,85 @@ const PRICE_BOOK = {
 // Countries Checkout will accept shipping addresses for. Extend as you grow.
 const SHIP_TO = ["US", "CA", "MX", "GB", "IE", "FR", "DE", "NL", "BE", "ES", "PT", "IT", "SE", "NO", "DK", "FI", "AT", "CH", "PL", "CZ", "GR", "AU", "NZ", "JP", "KR", "SG", "MY", "TH", "PH", "VN", "ID", "IN", "AE", "SA", "IL", "ZA", "BR", "AR", "CL", "CO", "PE"];
 
+// Fulfillment details from a completed Checkout Session. Shipping lives at
+// session.shipping_details (falling back to the collected_information copy);
+// when absent the order still logs, flagged MISSING, instead of silently
+// dropping the address a dropshipped order needs.
+function fulfillmentOf(s) {
+  const ship = (s.shipping_details) || ((s.collected_information || {}).shipping_details) || {};
+  const addr = ship.address || {};
+  const dest = [addr.line1, addr.city, [addr.state, addr.postal_code].filter(Boolean).join(" "), addr.country].filter(Boolean).join(", ");
+  return { name: ship.name || "?", dest };
+}
+
+const ORDER_FROM = process.env.ORDER_FROM || "The Squishy Corner <hello@thesquishycorner.com>";
+
+function orderRef(sessionId) {
+  return String(sessionId || "").replace("cs_test_", "").replace("cs_live_", "").slice(0, 12).toUpperCase() || "—";
+}
+
+// Turns the "peanut-2x2,peanut-1x1" cart metadata back into pretty lines.
+// Unknown fragments are skipped; totals always come from Stripe instead.
+function cartLines(cartMeta) {
+  const out = [];
+  for (const part of String(cartMeta || "").split(",")) {
+    const m = part.match(/^(.+)x(\d+)$/);
+    const entry = m && PRICE_BOOK[m[1]];
+    const qty = m && Number(m[2]);
+    if (!entry || !qty || qty % entry.packQty !== 0) continue;
+    const packs = qty / entry.packQty;
+    out.push(`${packs} × ${entry.name} — $${((packs * entry.packCents) / 100).toFixed(2)}`);
+  }
+  return out;
+}
+
+function buildOrderEmail({ ref, lines, totalCents, name, dest }) {
+  const total = (Number(totalCents || 0) / 100).toFixed(2);
+  const first = name && name !== "?" ? name.split(" ")[0] : "there";
+  const items = lines.length ? lines.join("\n") : "Your squishies";
+  const itemsHtml = lines.length
+    ? lines.map((l) => `<li style="margin:4px 0">${l}</li>`).join("")
+    : "<li>Your squishies</li>";
+  const shipBlock = dest ? `Shipping to:\n${name}\n${dest}\n\n` : "";
+  const shipHtml = dest ? `<p style="margin:16px 0 0;color:#5b4a44">Shipping to:<br><strong>${name}</strong><br>${dest}</p>` : "";
+  const subject = "Order confirmed — your squishy is being packed";
+  const text =
+    `Hi ${first},\n\nThanks for your order! Your squishy is being packed.\n\n` +
+    `Order ${ref}\n${items}\nTotal charged: $${total}\n\n${shipBlock}` +
+    `You'll get a tracking link by email as soon as your order ships (usually within 1–2 business days).\n\n` +
+    `Questions? Just reply to this email.\n\n— The Squishy Corner (Cascade Collective LLC)`;
+  const html =
+    `<div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#3a2a26">` +
+    `<h1 style="font-size:22px;margin:0 0 8px">Order confirmed!</h1>` +
+    `<p style="margin:0 0 16px;color:#5b4a44">Hi ${first} — thanks for your order! Your squishy is being packed.</p>` +
+    `<p style="margin:0;color:#5b4a44">Order <strong>${ref}</strong></p>` +
+    `<ul style="margin:8px 0;padding-left:20px;color:#3a2a26">${itemsHtml}</ul>` +
+    `<p style="margin:0;color:#3a2a26">Total charged: <strong>$${total}</strong></p>${shipHtml}` +
+    `<p style="margin:16px 0 0;color:#5b4a44">You'll get a tracking link by email as soon as your order ships (usually within 1–2 business days).</p>` +
+    `<p style="margin:16px 0 0;color:#5b4a44">Questions? Just reply to this email.<br>— The Squishy Corner (Cascade Collective LLC)</p></div>`;
+  return { subject, text, html };
+}
+
+// Sends via Resend. Never throws — a failed email must not fail the webhook.
+async function sendOrderEmail(to, mail) {
+  const key = process.env.RESEND_API_KEY || "";
+  if (!key) {
+    console.warn("No RESEND_API_KEY — skipping order confirmation email");
+    return;
+  }
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ from: ORDER_FROM, to: [to], subject: mail.subject, text: mail.text, html: mail.html }),
+    });
+    if (!res.ok) console.error(`Order email failed (${res.status}): ${(await res.text()).slice(0, 200)}`);
+    else console.log(`[order] confirmation email sent to ${to}`);
+  } catch (err) {
+    console.error("Order email failed:", err && err.message);
+  }
+}
+
 const MIME = {
   ".html": "text/html; charset=utf-8",
   ".css": "text/css; charset=utf-8",
@@ -197,11 +276,20 @@ async function handleWebhook(req, res) {
   if (event.type === "checkout.session.completed") {
     const s = event.data.object;
     const email = (s.customer_details && s.customer_details.email) || "?";
-    const addr = (s.shipping_details && s.shipping_details.address) || {};
-    const where = [addr.city, addr.country].filter(Boolean).join(", ");
-    console.log(`[order] ${s.id} ${((s.amount_total || 0) / 100).toFixed(2)} ${(s.currency || "").toUpperCase()} email=${email} ship=${where}`);
-    // TODO: fulfill the order here — e.g. place the supplier order,
-    // save to a database, or send a confirmation email.
+    const phone = (s.customer_details && s.customer_details.phone) || "?";
+    const { name, dest } = fulfillmentOf(s);
+    if (!dest) console.error(`[order] ${s.id} collected NO shipping address — find it in the Stripe dashboard`);
+    console.log(`[order] ${s.id} ${((s.amount_total || 0) / 100).toFixed(2)} ${(s.currency || "").toUpperCase()} email=${email} phone=${phone} ship-to=${name} <${dest || "MISSING"}>`);
+    if (email !== "?") {
+      await sendOrderEmail(email, buildOrderEmail({
+        ref: orderRef(s.id),
+        lines: cartLines(s.metadata && s.metadata.cart),
+        totalCents: s.amount_total || 0,
+        name, dest,
+      }));
+    }
+    // TODO: fulfill the order here — e.g. place the supplier order
+    // or save to a database.
   }
   return json(res, 200, { received: true });
 }
@@ -247,6 +335,10 @@ const server = http.createServer((req, res) => {
   });
 });
 
-server.listen(PORT, () => {
-  console.log(`The Squishy Corner running at http://localhost:${PORT}`);
-});
+if (require.main === module) {
+  server.listen(PORT, () => {
+    console.log(`The Squishy Corner running at http://localhost:${PORT}`);
+  });
+}
+
+module.exports = { fulfillmentOf, orderRef, cartLines, buildOrderEmail };

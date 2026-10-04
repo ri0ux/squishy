@@ -36,6 +36,12 @@ gives you a `whsec_...` to use as `STRIPE_WEBHOOK_SECRET`.
 
 Test card: `4242 4242 4242 4242`, any future expiry, any CVC.
 
+Paid orders trigger a confirmation email via Resend. Setup: create a
+Resend account, verify `thesquishycorner.com` (add the DNS records it
+shows you), and set `RESEND_API_KEY` in Railway Variables (`ORDER_FROM`
+overrides the sender). Without the key the server still runs — it just
+skips the email with a warning.
+
 ## Local checkout + webhook testing
 
 Terminal 1 — server with your test key (`.env` holds it; see `.env.example`):
