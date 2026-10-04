@@ -2,11 +2,14 @@
   "name": "the-squishy-corner",
   "version": "1.0.0",
   "private": true,
-  "description": "Mobile-first storefront for The Squishy Corner. Zero dependencies.",
+  "description": "Mobile-first storefront for The Squishy Corner, with Stripe Checkout.",
   "engines": {
     "node": ">=18"
   },
   "scripts": {
     "start": "node server.js"
+  },
+  "dependencies": {
+    "stripe": "^23.0.0"
   }
 }

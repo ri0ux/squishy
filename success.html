@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Squishy — The Squishy Corner</title>
-  <meta name="description" content="Meet the crunchy Peanut Squishy — a bead-filled fidget with free shipping.">
+  <title>Order Confirmed — The Squishy Corner</title>
+  <meta name="description" content="Thanks for your order! Your squishy is being packed.">
+  <meta name="robots" content="noindex">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
@@ -14,28 +15,10 @@
   <link rel="icon" href="/images/logo.png" type="image/png">
   <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
   <link rel="manifest" href="/site.webmanifest">
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="The Squishy Corner">
-  <meta property="og:title" content="Peanut Squishy — The Squishy Corner">
-  <meta property="og:description" content="A crunchy little desk peanut with a crackly clay-and-bead core. Free shipping.">
-  <meta property="og:image" content="https://thesquishycorner.com/images/main-peanut-box.png">
   <meta name="theme-color" content="#F6B93B">
-  <meta property="og:url" content="https://thesquishycorner.com/p/peanut-squishy">
-  <meta property="og:image:width" content="800">
-  <meta property="og:image:height" content="800">
-  <meta property="og:image:alt" content="Peanut squishy with its gift box">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Peanut Squishy — The Squishy Corner">
-  <meta name="twitter:description" content="A crunchy little desk peanut with a crackly clay-and-bead core. Free shipping.">
-  <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":"Organization","name":"The Squishy Corner","legalName":"Cascade Collective LLC","url":"https://thesquishycorner.com/","logo":"https://thesquishycorner.com/images/logo.png","description":"Cute, satisfying squishy fidget toys with free shipping.","email":"hello@thesquishycorner.com"}
-  </script>
-  <script type="application/ld+json" id="product-json">
-  {"@context":"https://schema.org","@type":"Product","name":"Peanut Squishy","description":"A hyper-realistic little peanut with a soft, squeezable shell and a crackly clay-and-bead core.","image":["https://thesquishycorner.com/images/main-peanut-box.png","https://thesquishycorner.com/images/better-hand-squeeze.avif","https://thesquishycorner.com/images/handheld-peanut.png"],"brand":{"@type":"Brand","name":"The Squishy Corner"},"offers":{"@type":"Offer","price":"10.00","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"https://thesquishycorner.com/p/peanut-squishy"}}
-  </script>
 </head>
 <body data-theme="peanut">
-  <a class="skip-link" href="#pdpRoot">Skip to content</a>
+  <a class="skip-link" href="#main-content">Skip to content</a>
   <div class="announce"><strong>Free shipping</strong> on every order · The crunchy peanut — just $10</div>
   <header class="site-header"><div class="wrap header-inner">
     <a class="logo" href="/" aria-label="The Squishy Corner home">
@@ -51,9 +34,14 @@
     <button class="cart-btn" data-open-cart><span data-icon="bag" style="display:inline-flex"></span>Cart&nbsp;<span class="cart-count" data-cart-count>0</span></button>
   </div></header>
 
-  <main id="pdpRoot" aria-live="polite">
-    <div class="wrap"><div class="soon-hero"><p style="color:var(--ink-soft);font-weight:800">Loading the squish…</p></div></div>
-  </main>
+  <main id="main-content"><div class="wrap prose" style="text-align:center">
+    <img class="about-art" src="/images/kawaii.png" alt="Smiling kawaii peanut character celebrating your order">
+    <h1>Order confirmed!</h1>
+    <p class="lede">Thanks for shopping with us — your squishy is being packed.</p>
+    <p>A receipt is on its way to your inbox, and you'll get a tracking link the moment your order ships (usually within 1–2 business days).</p>
+    <p>Order ref: <strong id="orderRef">—</strong></p>
+    <p style="margin-top:28px"><a class="btn btn-primary" href="/">Back to the shop</a></p>
+  </div></main>
 
   <footer class="site-footer"><div class="wrap">
     <div class="footer-grid">
@@ -80,8 +68,14 @@
     <div class="footer-bottom"><span>© <span data-year>2026</span> <a href="https://cascadecollectivellc.com/">Cascade Collective LLC</a></span><span>Secure checkout · Tracked shipping</span></div>
   </div></footer>
 
+  <script>
+    // Payment went through — empty the cart and show a short order ref.
+    try { localStorage.removeItem("tsc-cart-v1"); } catch (e) {}
+    var sid = new URLSearchParams(location.search).get("session_id") || "";
+    document.getElementById("orderRef").textContent =
+      sid ? sid.replace("cs_test_", "").replace("cs_live_", "").slice(0, 12).toUpperCase() : "—";
+  </script>
   <script src="/js/catalog.js" defer></script>
   <script src="/js/site.js" defer></script>
-  <script src="/js/product.js" defer></script>
 </body>
 </html>

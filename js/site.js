@@ -167,8 +167,23 @@
         <div class="subtotal-row"><span>Subtotal</span><strong>${window.money(sub)}</strong></div>
         <div class="trust-micro" style="margin:0 0 12px">Free tracked shipping included</div>
         <button class="btn btn-primary btn-block" id="checkoutBtn">${window.icon("lock")} Checkout — ${window.money(sub)}</button>`;
-      document.getElementById("checkoutBtn").addEventListener("click", () => {
-        window.toast("Checkout opens soon — we're putting the final squish on payments.");
+      document.getElementById("checkoutBtn").addEventListener("click", async () => {
+        const btn = document.getElementById("checkoutBtn");
+        btn.disabled = true;
+        btn.textContent = "Redirecting to secure checkout…";
+        try {
+          const res = await fetch("/api/checkout", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ items: Cart.items.map((i) => ({ id: i.id, qty: i.qty })) }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok || !data.url) throw new Error(data.error || "Checkout failed. Please try again.");
+          window.location.href = data.url;
+        } catch (err) {
+          renderCartUI();
+          window.toast(err.message || "Couldn't start checkout. Please try again.");
+        }
       });
     }
 
